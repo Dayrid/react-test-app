@@ -64,6 +64,19 @@ function App() {
   const tan = (x) => Math.tan(x);
   const cotan = (x) => 1 / Math.tan(x);
 
+  const points_obj = {
+    1000: '1000 точек',
+    10000: '10 000 точек',
+    100000: '100 000 точек',
+    1000000: '1 000 000 точек',
+  }
+  const func_obj = {
+    'sin': 'sin(x)',
+    'cos': 'cos(x)',
+    'tan': 'tan(x)',
+    'cotan': 'cotan(x)',
+  }
+
   const [plot_data, setPlotData] = useState({ x: [0], y: [0] });
   const [plot_type, setPlotType] = useState('sin');
   const [points, setPoints] = useState(1000);
@@ -96,17 +109,15 @@ function App() {
       <div className='d-flex flex-row w-100 gap-2 pt-3 ps-3'>
         <label className='text-black'>Тип графика: </label>
         <select id="type" value={plot_type} onChange={changeSelectType}>
-          <option value="sin">Синусоида</option>
-          <option value="cos">Косинусоида</option>
-          <option value="tan">Тангенс</option>
-          <option value="cotan">Котангенс</option>
+          {Object.entries(func_obj).map(([key, value]) => (
+            <option key={key} value={key}>{value}</option>
+          ))}
         </select>
         <label>Тип графика: </label>
         <select id="points" value={points} onChange={changeSelectPoints}>
-          <option value="1000">1000 точек</option>
-          <option value="10000">10000 точек</option>
-          <option value="100000">100000 точек</option>
-          <option value="1000000">1000000 точек</option>
+          {Object.entries(points_obj).map(([key, value]) => (
+            <option key={key} value={key}>{value}</option>
+          ))}
         </select>
       </div>
       <div>
