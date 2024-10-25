@@ -4,4 +4,4 @@
 ### `npm i`
 ### `npm start`
 
-Можно открыть [http://localhost:3000](http://localhost:3000) для для просмотра страницы.
+Можно открыть [http://localhost:3000](http://localhost:3000) для просмотра страницы.
