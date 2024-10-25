@@ -42,7 +42,7 @@ function RandomScatterPlot({ title, x, y }) {
           y: sampledY,
           mode: 'lines',
           type: 'scattergl',
-          line: { shape: 'linear', color: 'blue' },
+          line: { shape: 'spline', color: 'blue' },
         },
       ]}
       layout={{
