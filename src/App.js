@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react';
 
 function generateData(func, n = 1000) {
   const x = Array.from({ length: n }, (_, i) => (i - n / 2));
-  const y = Array.from({ length: n }, (_, i) => func(i) * 0.6);
+  const y = x.map(x => func(x));
   return { x, y };
 }
 
