@@ -1,14 +1,23 @@
 import Plot from 'react-plotly.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
-function generateData(func, n = 1000) {
-  const x = Array.from({ length: n }, (_, i) => (i - n / 2));
-  const y = Array.from({ length: n }, (_, i) => func(i) * 0.6);
+function generateData(func, startX = 0, n = 100) {
+  const x = Array.from({ length: n }, (_, i) => startX + (i - n/2));
+  const y = x.map(func);
   return { x, y };
 }
 
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * Linearly interpolate between x and y points to create a new set of x and y points
+ * @param {Array<number>} x - x values
+ * @param {Array<number>} y - y values
+ * @param {number} [numPoints = 1000] - number of interpolated points
+ * @returns {Object} - object with x and y properties, each containing the interpolated values
+ */
+/******  5fbd39e6-7d76-4ca5-8849-278d7c318aea  *******/
 function linearInterpolation(x, y, numPoints = 1000) {
   const interpolatedX = Array.from({ length: numPoints }, (_, i) => {
     return (i * (x[x.length - 1] - x[0])) / (numPoints - 1) + x[0];
@@ -31,8 +40,16 @@ function linearInterpolation(x, y, numPoints = 1000) {
   return { x: interpolatedX, y: interpolatedY };
 }
 
-function RandomScatterPlot({ title, x, y }) {
-  const { x: sampledX, y: sampledY } = linearInterpolation(x, y, 1000);
+function RandomScatterPlot({ title, x, y, points, resample = false }) {
+  let sampledX = [];
+  let sampledY = [];
+
+  if (resample) {
+    ({ x: sampledX, y: sampledY } = linearInterpolation(x, y, points / 10));
+  } else {
+    sampledX = x;
+    sampledY = y;
+  }
 
   return (
     <Plot
@@ -42,7 +59,7 @@ function RandomScatterPlot({ title, x, y }) {
           y: sampledY,
           mode: 'lines',
           type: 'scattergl',
-          line: { shape: 'linear', color: 'blue' },
+          line: { shape: 'spline', color: 'blue' },
         },
       ]}
       layout={{
@@ -64,22 +81,26 @@ function App() {
   const tan = (x) => Math.tan(x);
   const cotan = (x) => 1 / Math.tan(x);
 
+  const random = (x) => Math.random() * x;
+
   const points_obj = {
     1000: '1000 точек',
     10000: '10 000 точек',
     100000: '100 000 точек',
     1000000: '1 000 000 точек',
-  }
+  };
   const func_obj = {
     'sin': 'sin(x)',
     'cos': 'cos(x)',
     'tan': 'tan(x)',
     'cotan': 'cotan(x)',
-  }
+    'random': 'random(x)',
+  };
 
   const [plot_data, setPlotData] = useState({ x: [0], y: [0] });
   const [plot_type, setPlotType] = useState('sin');
   const [points, setPoints] = useState(1000);
+  const [currentX, setCurrentX] = useState(0);
 
   const changeSelectType = (event) => {
     setPlotType(event.target.value);
@@ -90,19 +111,27 @@ function App() {
   };
 
   useEffect(() => {
-    if (plot_type === 'sin') {
-      setPlotData(generateData(sin, points));
-    } else if (plot_type === 'cos') {
-      setPlotData(generateData(cos, points));
-    } else if (plot_type === 'tan') {
-      setPlotData(generateData(tan, points));
-    } else if (plot_type === 'cotan') {
-      setPlotData(generateData(cotan, points));
-    } else {
-      setPlotData(generateData(sin, points));
-    }
-  }, [plot_type, points]);
+    const funcMap = { sin, cos, tan, cotan, random };
+    const selectedFunc = funcMap[plot_type];
 
+    const interval = setInterval(() => {
+      const newData = generateData(selectedFunc, currentX, points);
+      setPlotData((prevData) => ({
+        x: [...prevData.x, ...newData.x],
+        y: [...prevData.y, ...newData.y],
+      }));
+      setCurrentX((prevX) => prevX + points * 0.05);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [plot_type, currentX, points]);
+
+  useEffect(() => {
+    const funcMap = { sin, cos, tan, cotan, random };
+    const selectedFunc = funcMap[plot_type];
+    setPlotData(generateData(selectedFunc, 0, points));
+    setCurrentX(0);
+  }, [plot_type, points]);
 
   return (
     <div className='d-flex flex-column w-100 h-100'>
@@ -121,7 +150,7 @@ function App() {
         </select>
       </div>
       <div>
-        <RandomScatterPlot title="Scattergl plot" x={plot_data.x} y={plot_data.y} />
+        <RandomScatterPlot title="Scattergl plot" x={plot_data.x} y={plot_data.y} points={points} resample={true} />
       </div>
     </div>
   );
